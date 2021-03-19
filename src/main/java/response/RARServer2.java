@@ -10,6 +10,7 @@ import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
 
 import static java.lang.Thread.sleep;
+import static response.RARHandler.requestResponse;
 import static utils.PortUtils.SERVER_2_PORT;
 
 @Slf4j
@@ -18,7 +19,7 @@ public class RARServer2 {
 
   public static void main(String[] args) throws InterruptedException {
 
-    var disposable = RSocketServer.create(requestResponse())
+    var disposable = RSocketServer.create(requestResponse("s2"))
       .payloadDecoder(PayloadDecoder.ZERO_COPY)
       .bind(TcpServerTransport.create(SERVER_2_PORT))
       .publishOn(Schedulers.newParallel("pp", 5))
@@ -30,20 +31,4 @@ public class RARServer2 {
 
   }
 
-  private static SocketAcceptor requestResponse() {
-    return SocketAcceptor.forRequestResponse(payload -> {
-      var data = payload.getDataUtf8();
-      payload.release();
-
-
-      final String name = "s2" + data;
-
-
-      log.info("Received request data {}", data);
-
-      var responsePayload = DefaultPayload.create(name);
-      return Mono.just(responsePayload);
-//      return Mono.empty();
-    });
-  }
 }

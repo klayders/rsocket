@@ -27,44 +27,23 @@ public class RARClient {
         .payloadDecoder(PayloadDecoder.ZERO_COPY)
         .connect(TcpClientTransport.create("localhost", 8765));
 
+    final RSocket block = bean.block();
+
+
+    // готово
     Flux.range(0, 10)
-      .flatMap(integer -> startSendingMessage1(bean, integer))
-      .repeatWhen(r -> r.delayElements(Duration.ofSeconds(5)))
+      .flatMap(integer -> send(block, "m" + integer))
+//      .repeatWhen(r -> r.delayElements(Duration.ofSeconds(5)))
       .onErrorContinue((e, o) -> log.error("obj=" + o, e))
       .publishOn(Schedulers.newParallel("pp", 5))
       .subscribeOn(Schedulers.newParallel("ss", 5))
       .subscribe();
-
-//    final RSocket block = bean.block();
-//
-//
-//    // готово
-//    Flux.range(0, 10)
-//      .flatMap(integer -> send(block, "m" + integer))
-//      .repeatWhen(r -> r.delayElements(Duration.ofSeconds(5)))
-//      .onErrorContinue((e, o) -> log.error("obj=" + o, e))
-//      .publishOn(Schedulers.newParallel("pp", 5))
-//      .subscribeOn(Schedulers.newParallel("ss", 5))
-//      .subscribe();
 
     sleep(500_000);
 
 
   }
 
-  // create multiple connection for send message
-  private static Mono<String> startSendingMessage1(Mono<RSocket> bean, Integer integer) {
-    return bean.flatMap(
-      rSocket -> send(rSocket, "m" + integer).flatMap(response -> send(rSocket, response)).flatMap(response -> send(rSocket, response))
-    );
-  }
-
-  // create multiple connection for send message
-  private static Mono<String> startSendingMessage(Mono<RSocket> bean, Integer integer) {
-    return bean.flatMap(
-      rSocket -> send(rSocket, "m" + integer).flatMap(response -> send(rSocket, response)).flatMap(response -> send(rSocket, response))
-    );
-  }
 
   // process messages in one tcp connection
   private static Mono<String> send(RSocket rSocket, String message) {
@@ -77,8 +56,7 @@ public class RARClient {
           return responseData;
         }
       )
-      .publishOn(Schedulers.newParallel("pp", 5))
-      .subscribeOn(Schedulers.newParallel("ss", 5));
+      .subscribeOn(Schedulers.newParallel("pp", 5));
   }
 
 }

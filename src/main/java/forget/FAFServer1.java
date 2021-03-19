@@ -1,13 +1,12 @@
 package forget;
 
-import io.rsocket.SocketAcceptor;
 import io.rsocket.core.RSocketServer;
 import io.rsocket.frame.decoder.PayloadDecoder;
 import io.rsocket.transport.netty.server.TcpServerTransport;
 import lombok.extern.slf4j.Slf4j;
-import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
 
+import static forget.FAFHandler.fireAndForget;
 import static java.lang.Thread.sleep;
 import static utils.PortUtils.SERVER_1_PORT;
 
@@ -17,7 +16,7 @@ public class FAFServer1 {
 
   public static void main(String[] args) throws InterruptedException {
 
-    var disposable = RSocketServer.create(requestResponse())
+    var disposable = RSocketServer.create(fireAndForget())
       .payloadDecoder(PayloadDecoder.ZERO_COPY)
       .bind(TcpServerTransport.create(SERVER_1_PORT))
       .publishOn(Schedulers.newParallel("pp", 5))
@@ -29,13 +28,5 @@ public class FAFServer1 {
 
   }
 
-  private static SocketAcceptor requestResponse() {
-    return SocketAcceptor.forFireAndForget(payload -> {
-      var data = payload.getDataUtf8();
-      payload.release();
 
-      log.info("Received request data {}", data);
-      return Mono.empty();
-    });
-  }
 }
