@@ -30,7 +30,6 @@ public class FAFClient {
     final RSocket block = bean.block();
 
 
-    // готово
     Flux.range(0, 10)
       .flatMap(integer -> send(block, "m" + integer))
       .repeatWhen(r -> r.delayElements(Duration.ofSeconds(5)))
@@ -48,8 +47,7 @@ public class FAFClient {
   // process messages in one tcp connection
   private static Mono<Void> send(RSocket rSocket, String message) {
     return rSocket.fireAndForget(DefaultPayload.create(message))
-      .publishOn(Schedulers.newParallel("pp", 5))
-      .subscribeOn(Schedulers.newParallel("ss", 5));
+      .subscribeOn(Schedulers.newParallel("faf-client", 5));
   }
 
 }

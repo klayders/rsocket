@@ -16,11 +16,9 @@ public class FAFServer2 {
 
   public static void main(String[] args) throws InterruptedException {
 
-    var disposable = RSocketServer.create(fireAndForget())
+    var disposable = RSocketServer.create(fireAndForget("s2"))
       .payloadDecoder(PayloadDecoder.ZERO_COPY)
       .bind(TcpServerTransport.create(SERVER_2_PORT))
-      .publishOn(Schedulers.newParallel("pp", 5))
-      .subscribeOn(Schedulers.newParallel("ss", 5))
       .subscribe();
 
 

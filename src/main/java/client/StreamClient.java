@@ -1,6 +1,5 @@
 package client;
 
-
 import io.rsocket.RSocket;
 import io.rsocket.core.RSocketConnector;
 import io.rsocket.frame.decoder.PayloadDecoder;
@@ -8,7 +7,6 @@ import io.rsocket.transport.netty.client.TcpClientTransport;
 import io.rsocket.util.DefaultPayload;
 import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
 
 import java.time.Duration;
@@ -16,7 +14,7 @@ import java.time.Duration;
 import static java.lang.Thread.sleep;
 
 @Slf4j
-public class RARClient {
+public class StreamClient {
 
 
   public static void main(String[] args) throws InterruptedException {
@@ -30,6 +28,7 @@ public class RARClient {
     final RSocket block = bean.block();
 
 
+    // готово
     Flux.range(0, 10)
       .flatMap(integer -> send(block, "m" + integer))
 //      .repeatWhen(r -> r.delayElements(Duration.ofSeconds(5)))
@@ -43,8 +42,10 @@ public class RARClient {
 
   }
 
-  private static Mono<String> send(RSocket rSocket, String message) {
-    return rSocket.requestResponse(DefaultPayload.create(message))
+  // process messages in one tcp connection
+  private static Flux<String> send(RSocket rSocket, String message) {
+    return rSocket.requestStream(DefaultPayload.create(message))
+      .limitRate(10)
       .map(result -> {
 
           var responseData = result.getDataUtf8();
@@ -53,7 +54,7 @@ public class RARClient {
           return responseData;
         }
       )
-      .subscribeOn(Schedulers.newParallel("rar-client", 5));
+      .subscribeOn(Schedulers.newParallel("stream-client", 5));
   }
 
 }

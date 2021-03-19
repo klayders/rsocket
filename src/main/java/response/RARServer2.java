@@ -22,8 +22,6 @@ public class RARServer2 {
     var disposable = RSocketServer.create(requestResponse("s2"))
       .payloadDecoder(PayloadDecoder.ZERO_COPY)
       .bind(TcpServerTransport.create(SERVER_2_PORT))
-      .publishOn(Schedulers.newParallel("pp", 5))
-      .subscribeOn(Schedulers.newParallel("ss", 5))
       .subscribe();
 
 

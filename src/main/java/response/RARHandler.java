@@ -30,6 +30,6 @@ public class RARHandler {
       var responsePayload = DefaultPayload.create(name);
       return Mono.just(responsePayload);
     })
-      .subscribeOn(Schedulers.newParallel("parallels", 10)));
+      .subscribeOn(Schedulers.newParallel("request-response-parallel", 10)));
   }
 }
