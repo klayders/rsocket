@@ -1,8 +1,5 @@
-package server;
+package response;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import io.User;
 import io.rsocket.SocketAcceptor;
 import io.rsocket.core.RSocketServer;
 import io.rsocket.frame.decoder.PayloadDecoder;
@@ -13,18 +10,17 @@ import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
 
 import static java.lang.Thread.sleep;
+import static utils.PortUtils.SERVER_3_PORT;
 
 @Slf4j
-public class ExamServer2 {
-
-  private static final ObjectMapper mapper = new ObjectMapper();
+public class RARServer3 {
 
 
   public static void main(String[] args) throws InterruptedException {
 
-    var res = RSocketServer.create(requestResponse())
+    var disposable = RSocketServer.create(requestResponse())
       .payloadDecoder(PayloadDecoder.ZERO_COPY)
-      .bind(TcpServerTransport.create(12346))
+      .bind(TcpServerTransport.create(SERVER_3_PORT))
       .publishOn(Schedulers.newParallel("pp", 5))
       .subscribeOn(Schedulers.newParallel("ss", 5))
       .subscribe();
@@ -40,7 +36,7 @@ public class ExamServer2 {
       payload.release();
 
 
-      final String name = "s2" + data;
+      final String name = "s3" + data;
 
 
       log.info("Received request data {}", data);
