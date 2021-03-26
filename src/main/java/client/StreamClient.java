@@ -25,15 +25,10 @@ public class StreamClient {
   public static void main(String[] args) throws InterruptedException {
     RSocket rsocket =
       RSocketConnector.create()
-//        .acceptor(
-//          SocketAcceptor.forRequestStream(
-//            payload ->
-//              Flux.interval(Duration.ofSeconds(10))
-//                .map(aLong -> DefaultPayload.create("Bi-di Response => " + aLong))
-//          )
-//        )
         .connect(TcpClientTransport.create("localhost", 8765))
         .block();
+
+    assert rsocket != null;
 
     rsocket
       .requestStream(DefaultPayload.create("Hello"))
