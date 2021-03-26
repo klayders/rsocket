@@ -7,7 +7,6 @@ import lombok.extern.slf4j.Slf4j;
 
 import static channel.ChannelHandler.customSocketAcceptor;
 import static java.lang.Thread.sleep;
-import static utils.PortUtils.SERVER_1_PORT;
 import static utils.PortUtils.SERVER_2_PORT;
 
 @Slf4j

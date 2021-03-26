@@ -1,4 +1,4 @@
-package client;
+package channel.client;
 
 import io.rsocket.Payload;
 import io.rsocket.RSocket;
@@ -15,7 +15,7 @@ import java.time.Duration;
 import static java.lang.Thread.sleep;
 
 @Slf4j
-public class ChannelClient {
+public class FAFClient {
 
 
   public static void main(String[] args) throws InterruptedException {
@@ -34,21 +34,7 @@ public class ChannelClient {
       .subscribeOn(Schedulers.newParallel("ss", 5))
       .subscribe();
 
-    rsocket
-      .requestChannel(
-        Flux.range(0, 5)
-          .map(integer -> DefaultPayload.create(" inner_count=" + integer))
-      )
-      .map(Payload::getDataUtf8)
-      .doOnNext(s -> log.info("requestChannel: receive={}", s))
-      .doFinally(signalType -> rsocket.dispose())
-      .then()
-      .subscribe();
-
-
-
     sleep(500_000);
-
 
   }
 
@@ -58,6 +44,5 @@ public class ChannelClient {
     return rSocket.fireAndForget(DefaultPayload.create(message))
       .subscribeOn(Schedulers.newParallel("faf-client", 5));
   }
-
 
 }
